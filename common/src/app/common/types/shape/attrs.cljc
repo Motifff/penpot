@@ -352,6 +352,8 @@
 
            :grow-type
 
+           :font-size-scaling
+
            :exports
 
            :layout-item-margin

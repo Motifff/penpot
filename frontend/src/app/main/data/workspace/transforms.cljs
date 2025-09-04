@@ -166,7 +166,9 @@
 
                   shapev (-> (gpt/point width height))
 
-                  scale-text (contains? layout :scale-text)
+                  scale-text (or (contains? layout :scale-text)
+                                 (and (cfh/text-shape? shape)
+                                      (= (:font-size-scaling shape) :proportional)))
 
                   ;; Force lock if the scale text mode is active
                   lock? (or ^boolean lock?
@@ -1237,4 +1239,4 @@
                origin
                (:transform shape (gmt/matrix))
                (:transform-inverse shape (gmt/matrix)))}}]
-        (rx/of (dwm/set-wasm-modifiers modifiers))))))
+                (rx/of (dwm/set-wasm-modifiers modifiers))))))

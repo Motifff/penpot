@@ -116,6 +116,10 @@
     :auto-height
     :fixed})
 
+(def font-size-scaling-types
+  #{:fixed
+    :proportional})
+
 (def schema:points
   [:vector {:gen/max 4 :gen/min 4} ::gpt/point])
 
@@ -223,6 +227,8 @@
    [:blur {:optional true} ctsb/schema:blur]
    [:grow-type {:optional true}
     [::sm/one-of grow-types]]
+   [:font-size-scaling {:optional true}
+    [::sm/one-of font-size-scaling-types]]
    [:applied-tokens {:optional true} cto/schema:applied-tokens]
    [:plugin-data {:optional true} ctpg/schema:plugin-data]])
 
@@ -415,7 +421,7 @@
     :hidden :masked-group :fills :proportion :proportion-lock :constraints-h
     :constraints-v :fixed-scroll :r1 :r2 :r3 :r4 :rotation :opacity :grids :exports
     :strokes :blend-mode :interactions :shadow :blur :grow-type :applied-tokens
-    :plugin-data})
+    :plugin-data :font-size-scaling})
 
 (def ^:private allowed-shape-geom-attrs #{:x :y :width :height})
 (def ^:private allowed-shape-base-attrs #{:id :name :type :selrect :points :transform
@@ -517,7 +523,8 @@
 
 (def ^:private minimal-text-attrs
   {:type :text
-   :name "Text"})
+   :name "Text"
+   :font-size-scaling :fixed})
 
 (def ^:private minimal-path-attrs
   {:type :path

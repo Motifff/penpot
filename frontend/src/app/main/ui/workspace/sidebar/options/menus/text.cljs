@@ -122,6 +122,37 @@
                         :title (tr "workspace.options.text-options.align-bottom")
                         :icon i/text-bottom}]]]))
 
+(mf/defc text-scaling-options
+  [{:keys [ids values on-blur] :as props}]
+  (let [font-size-scaling (:font-size-scaling values)
+
+        handle-change-scaling
+        (mf/use-fn
+         (mf/deps ids on-blur)
+         (fn [value]
+           (let [uid (js/Symbol)
+                 font-size-scaling (keyword value)]
+             (st/emit!
+              (dwu/start-undo-transaction uid)
+              (dwsh/update-shapes ids #(assoc % :font-size-scaling font-size-scaling)))
+
+             ;; We asynchronously commit so every sychronous event is resolved first and inside the transaction
+             (ts/schedule #(st/emit! (dwu/commit-undo-transaction uid))))
+           (when (some? on-blur) (on-blur))))]
+
+    [:div {:class (stl/css :text-scaling-options)}
+     [:& radio-buttons {:selected (d/name font-size-scaling)
+                        :on-change handle-change-scaling
+                        :name "text-scaling-options"}
+      [:& radio-button {:value "fixed"
+                        :id "text-scaling-fixed"
+                        :title (tr "workspace.options.text-options.font-size-scaling-fixed")
+                        :icon i/text-fixed}]
+      [:& radio-button {:value "proportional"
+                        :id "text-scaling-proportional"
+                        :title (tr "workspace.options.text-options.font-size-scaling-proportional")
+                        :icon i/text-font-size}]]]))
+
 (mf/defc grow-options
   [{:keys [ids values on-blur] :as props}]
   (let [grow-type (:grow-type values)
@@ -334,6 +365,7 @@
         [:div {:class (stl/css :text-align-options)}
          [:> text-align-options opts]
          [:> grow-options opts]
+         [:> text-scaling-options opts]
          [:> icon-button* {:variant "ghost"
                            :aria-label (tr "labels.options")
                            :data-testid "text-align-options-button"

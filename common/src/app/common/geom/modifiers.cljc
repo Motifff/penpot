@@ -48,7 +48,23 @@
       ;; Check the constraints, then resize
       :else
       (let [parent-id (:id parent)
-            parent-bounds (gtr/transform-bounds @(get bounds parent-id) (ctm/select-parent modifiers))]
+            parent-bounds (gtr/transform-bounds @(get bounds parent-id) (ctm/select-parent modifiers))
+            
+            ;; Check if parent is a frame with resize modifiers
+            frame-with-resize? (and (cfh/frame-shape? parent)
+                                   (ctm/has-geometry? modifiers))
+            
+            ;; Calculate scale factor for frame resize
+            scale-value (when frame-with-resize?
+                         (let [original-bounds @(get bounds parent-id)
+                               transformed-bounds @transformed-parent-bounds
+                               scale-x (/ (gpo/width-points transformed-bounds) 
+                                         (gpo/width-points original-bounds))
+                               scale-y (/ (gpo/height-points transformed-bounds) 
+                                         (gpo/height-points original-bounds))]
+                           ;; Use average of x and y scaling for text scaling
+                           (/ (+ scale-x scale-y) 2.0)))]
+        
         (->> children
              (reduce
               (fn [modif-tree child-id]
@@ -58,7 +74,17 @@
                         (gct/calc-child-modifiers
                          parent child modifiers ignore-constraints
                          child-bounds
-                         parent-bounds transformed-parent-bounds)]
+                         parent-bounds transformed-parent-bounds)
+                        
+                        ;; Add scale-content modifier for text children when frame is being scaled
+                        child-modifiers
+                        (if (and frame-with-resize? 
+                                (cfh/text-shape? child)
+                                scale-value
+                                (not= scale-value 1.0))
+                          (ctm/add-modifiers child-modifiers 
+                                            (ctm/scale-content-modifiers scale-value))
+                          child-modifiers)]
 
                     (cgt/add-modifiers modif-tree child-id child-modifiers))
                   modif-tree))

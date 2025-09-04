@@ -741,7 +741,11 @@
             ;; Scale can only be positive
             (let [value (mth/abs value)]
               (cond-> shape
-                (cfh/text-shape? shape)
+                ;; Only apply text content scaling if the shape is a text shape
+                ;; AND font-size-scaling is explicitly set to :proportional
+                ;; If font-size-scaling is :fixed or nil, don't scale text content
+                (and (cfh/text-shape? shape)
+                     (= (:font-size-scaling shape) :proportional))
                 (update-text-content scale-text-content value)
 
                 :always

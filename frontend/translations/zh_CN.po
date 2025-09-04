@@ -6173,6 +6173,14 @@ msgstr "自动宽度"
 msgid "workspace.options.text-options.grow-fixed"
 msgstr "固定"
 
+#: src/app/main/ui/workspace/sidebar/options/menus/text.cljs:XXX
+msgid "workspace.options.text-options.font-size-scaling-fixed"
+msgstr "固定字体大小"
+
+#: src/app/main/ui/workspace/sidebar/options/menus/text.cljs:XXX
+msgid "workspace.options.text-options.font-size-scaling-proportional"
+msgstr "比例缩放字体"
+
 #: src/app/main/ui/workspace/sidebar/options/menus/typography.cljs:391
 msgid "workspace.options.text-options.letter-spacing"
 msgstr "字距"
