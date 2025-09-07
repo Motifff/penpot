@@ -31,7 +31,8 @@
     :display-artboard-names
     :snap-ruler-guides
     :show-pixel-grid
-    :snap-pixel-grid})
+    :snap-pixel-grid
+    :batch})
 
 (def presets
   {:assets
@@ -48,7 +49,11 @@
 
    :tokens
    {:del #{:sitemap :layers :document-history :assets}
-    :add #{:tokens}}})
+    :add #{:tokens}}
+
+   :batch
+   {:del #{:sitemap :layers :document-history :assets :tokens}
+    :add #{:batch}}})
 
 (def valid-options-mode
   #{:design :prototype :inspect})

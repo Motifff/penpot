@@ -27,6 +27,7 @@
    [app.main.ui.workspace.left-header :refer [left-header*]]
    [app.main.ui.workspace.right-header :refer [right-header*]]
    [app.main.ui.workspace.sidebar.assets :refer [assets-toolbox*]]
+   [app.main.ui.workspace.sidebar.batch-toolbox :refer [batch-toolbox*]]
    [app.main.ui.workspace.sidebar.collapsable-button :refer [collapsed-button*]]
    [app.main.ui.workspace.sidebar.debug :refer [debug-panel*]]
    [app.main.ui.workspace.sidebar.debug-shape-info :refer [debug-shape-info*]]
@@ -112,7 +113,8 @@
         section        (cond
                          (or mode-inspect? (contains? layout :layers)) :layers
                          (contains? layout :assets) :assets
-                         (contains? layout :tokens) :tokens)
+                         (contains? layout :tokens) :tokens
+                         (contains? layout :batch) :batch)
 
         {on-pointer-down :on-pointer-down
          on-lost-pointer-capture :on-lost-pointer-capture
@@ -133,18 +135,19 @@
           (if ^boolean mode-inspect?
             [{:label (tr "workspace.sidebar.layers")
               :id "layers"}]
-            (if ^boolean design-tokens?
-              [{:label (tr "workspace.sidebar.layers")
-                :id "layers"}
-               {:label (tr "workspace.toolbar.assets")
-                :id "assets"}
-               ;; This string is intentionally not translated.
-               {:label "Tokens"
-                :id "tokens"}]
-              [{:label (tr "workspace.sidebar.layers")
-                :id "layers"}
-               {:label (tr "workspace.toolbar.assets")
-                :id "assets"}])))
+            (let [base-tabs (if ^boolean design-tokens?
+                              [{:label (tr "workspace.sidebar.layers")
+                                :id "layers"}
+                               {:label (tr "workspace.toolbar.assets")
+                                :id "assets"}
+                               ;; This string is intentionally not translated.
+                               {:label "Tokens"
+                                :id "tokens"}]
+                              [{:label (tr "workspace.sidebar.layers")
+                                :id "layers"}
+                               {:label (tr "workspace.toolbar.assets")
+                                :id "assets"}])]
+              (conj base-tabs {:label "Batch" :id "batch"}))))
 
         aside-class
         (stl/css-case
@@ -205,6 +208,9 @@
              {:tokens-lib tokens-lib
               :active-tokens active-tokens
               :resolved-active-tokens resolved-active-tokens}]
+
+            :batch
+            [:> batch-toolbox* {:size (- width 58)}]
 
             :layers
             [:> layers-content*
@@ -358,21 +364,27 @@
         resolved-active-tokens
         (sd/use-resolved-tokens* active-tokens)]
 
-    [:*
-     (if (:collapse-left-sidebar layout)
-       [:> collapsed-button*]
-       [:> left-sidebar* {:layout layout
-                          :file file
-                          :page-id page-id
-                          :tokens-lib tokens-lib
-                          :active-tokens active-tokens
-                          :resolved-active-tokens resolved-active-tokens}])
-     [:> right-sidebar* {:section section
-                         :selected selected
-                         :drawing-tool drawing-tool
-                         :layout layout
-                         :file file
-                         :file-id file-id
-                         :page-id page-id
-                         :tokens-lib tokens-lib
-                         :active-tokens resolved-active-tokens}]]))
+    (let [left-section (cond
+                         (contains? layout :assets) :assets
+                         (contains? layout :tokens) :tokens
+                         (contains? layout :batch) :batch
+                         :else :layers)]
+      [:*
+       (if (:collapse-left-sidebar layout)
+         [:> collapsed-button*]
+         [:> left-sidebar* {:layout layout
+                            :file file
+                            :page-id page-id
+                            :tokens-lib tokens-lib
+                            :active-tokens active-tokens
+                            :resolved-active-tokens resolved-active-tokens}])
+       (when (not= left-section :batch)
+         [:> right-sidebar* {:section section
+                             :selected selected
+                             :drawing-tool drawing-tool
+                             :layout layout
+                             :file file
+                             :file-id file-id
+                             :page-id page-id
+                             :tokens-lib tokens-lib
+                             :active-tokens resolved-active-tokens}])])))
